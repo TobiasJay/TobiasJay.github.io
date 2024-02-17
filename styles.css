@@ -3,8 +3,19 @@ body {
     font-family: 'Arial', sans-serif;
 }
 
+.container {
+    max-width: 700px; /* Adjust the maximum width as per your preference */
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.logo {
+    margin-left: 10px;
+}
+
 section {
-    width: 60%;
+    width: 85%;
     margin-bottom: 20px;
     margin-right: auto;
     margin-left: auto;
@@ -13,7 +24,7 @@ section {
 }
 
 img {
-    max-width: 80%;
+    max-width: 90%;
     height: auto;
 }
 

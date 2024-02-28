@@ -99,5 +99,15 @@ nav {
 }
 
 section {
-    padding: 50px;
+    padding: 20px;
+}
+
+p > img {
+    padding: 10px;
+}
+
+#Data-Science {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

@@ -13,168 +13,114 @@ const currentLevelElement = document.getElementById('current-level');
 const previousLevelElement = document.getElementById('previous-level');
 const nextLevelElement = document.getElementById('next-level');
 const levelDotsContainer = document.querySelector('.level-dots');
+const leftChevron = document.getElementById('left-chevron');
+const rightChevron = document.getElementById('right-chevron');
+const tapAreaLeft = document.querySelector('.tap-area-left');
+const tapAreaRight = document.querySelector('.tap-area-right');
 
-let startX;
-let currentX;
-let isDragging = false;
-let lastDragTime = 0;
-const dragThreshold = 10; // Minimum pixel movement to consider as a drag
+let isChangingLevel = false;
 
-levelContainer.addEventListener('touchstart', handleDragStart, false);
-levelContainer.addEventListener('touchmove', handleDragMove, false);
-levelContainer.addEventListener('touchend', handleDragEnd, false);
-
-levelContainer.addEventListener('mousedown', handleDragStart, false);
-levelContainer.addEventListener('mousemove', handleDragMove, false);
-levelContainer.addEventListener('mouseup', handleDragEnd, false);
-levelContainer.addEventListener('mouseleave', handleDragEnd, false);
-
-function handleDragStart(e) {
-    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    isDragging = false; // Start as not dragging
-    levelContainer.style.transition = 'none';
-    lastDragTime = Date.now();
-}
-
-function handleDragMove(e) {
-    currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-    const diff = currentX - startX;
-
-    // Only start dragging if the movement is greater than the threshold
-    if (!isDragging && Math.abs(diff) > dragThreshold) {
-        isDragging = true;
-    }
-
-    if (isDragging) {
-        e.preventDefault();
-        const maxDrag = levelContainer.offsetWidth / 2;
-        const dragPercentage = (diff / maxDrag) * 100;
-        const constrainedDrag = Math.max(Math.min(dragPercentage, 100), -100);
-        
-        updateLevelContainerPosition(constrainedDrag);
-    }
-}
-
-function handleDragEnd() {
-    if (!isDragging) {
-        // This was a click, not a drag
-        updateLevelContainerPosition(0);
+function changeLevel(direction) {
+    if (isChangingLevel) {
         return;
     }
 
-    isDragging = false;
-    const diff = currentX - startX;
-    const threshold = levelContainer.offsetWidth * 0.2; // 20% of width as threshold
-
-    if (diff > threshold && level > 0) {
-        finishLevelChange(100);
-    } else if (diff < -threshold && level < paddle.levels.length - 1) {
-        finishLevelChange(-100);
-    } else {
-        // Snap back to current level
-        finishLevelChange(0);
-    }
-
-    // Reset drag state
-    startX = null;
-    currentX = null;
-}
-
-function updateLevelContainerPosition(percentage) {
-    // Move the current level
-    currentLevelElement.style.transform = `translateX(${percentage}%)`;
-    
-    // Move the side levels without changing opacity
-    if (percentage > 0) {
-        // Moving right (showing previous level)
-        previousLevelElement.style.transform = `translateX(${percentage - 100}%)`;
-        nextLevelElement.style.transform = `translateX(${percentage + 100}%)`;
-    } else {
-        // Moving left (showing next level)
-        previousLevelElement.style.transform = `translateX(${percentage - 100}%)`;
-        nextLevelElement.style.transform = `translateX(${percentage + 100}%)`;
+    const newLevel = level + direction;
+    if (newLevel >= 0 && newLevel < paddle.levels.length) {
+        isChangingLevel = true;
+        level = newLevel;
+        updateLevelDisplay();
+        updateCountDisplay();
+        saveData();
+        isChangingLevel = false;
     }
 }
 
-function updateLevelDisplay() {
-    currentLevelElement.textContent = addCommasAndDollarSign(paddle.levels[level].amount);
-    previousLevelElement.textContent = level > 0 ? addCommasAndDollarSign(paddle.levels[level - 1].amount) : '';
-    nextLevelElement.textContent = level < paddle.levels.length - 1 ? addCommasAndDollarSign(paddle.levels[level + 1].amount) : '';
-
-    // Update active dot
-    const dots = levelDotsContainer.querySelectorAll('.dot');
-    dots.forEach((dot, index) => {
-        if (index === level) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-}
-
-function finishLevelChange(targetPercentage) {
-    const startPercentage = parseFloat(currentLevelElement.style.transform.replace('translateX(', '').replace('%)', '')) || 0;
+function animateLevelChange(startLevel, endLevel) {
     const startTime = performance.now();
-    const duration = 300; // 300ms animation
+    const duration = 200; // 200ms animation
+
+    // Prepare the content for the next and previous levels
+    const currentContent = addCommasAndDollarSign(paddle.levels[startLevel].amount);
+    const nextContent = endLevel < paddle.levels.length ? addCommasAndDollarSign(paddle.levels[endLevel].amount) : '';
+    const prevContent = startLevel > 0 ? addCommasAndDollarSign(paddle.levels[startLevel - 1].amount) : '';
 
     function animate(currentTime) {
         const elapsedTime = currentTime - startTime;
         const progress = Math.min(elapsedTime / duration, 1);
         const easedProgress = easeInOutCubic(progress);
-        const currentPercentage = startPercentage + (targetPercentage - startPercentage) * easedProgress;
+        const currentPercentage = 100 * (endLevel - startLevel) * (1 - easedProgress);
 
-        updateLevelContainerPosition(currentPercentage);
+        updateLevelContainerPosition(currentPercentage, startLevel, endLevel, currentContent, nextContent, prevContent);
 
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            // Animation finished
-            if (targetPercentage !== 0) {
-                if (targetPercentage > 0 && level > 0) {
-                    level--;
-                } else if (targetPercentage < 0 && level < paddle.levels.length - 1) {
-                    level++;
-                }
-            }
+            level = endLevel; // Only update the level after animation is complete
             updateLevelDisplay();
             updateCountDisplay();
-            updateLevelContainerPosition(0);
-            
-            // Reset drag state
-            isDragging = false;
-            startX = null;
-            currentX = null;
-            
-            saveData(); // Save data after level change
+            updateLevelContainerPosition(0, endLevel, endLevel, nextContent, nextContent, prevContent);
+            saveData();
+            isChangingLevel = false;
         }
     }
 
     requestAnimationFrame(animate);
 }
 
-// Easing function for smoother animation
-function easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+function updateLevelContainerPosition(percentage, currentLevel, targetLevel, currentContent, nextContent, prevContent) {
+    const direction = targetLevel > currentLevel ? 1 : -1;
+
+    currentLevelElement.textContent = currentContent;
+    currentLevelElement.style.transform = `translateX(${percentage}%)`;
+
+    if (direction > 0) {
+        previousLevelElement.textContent = prevContent;
+        previousLevelElement.style.transform = `translateX(${percentage - 100}%)`;
+        nextLevelElement.textContent = nextContent;
+        nextLevelElement.style.transform = `translateX(${percentage + 100}%)`;
+    } else {
+        previousLevelElement.textContent = nextContent;
+        previousLevelElement.style.transform = `translateX(${percentage + 100}%)`;
+        nextLevelElement.textContent = prevContent;
+        nextLevelElement.style.transform = `translateX(${percentage - 100}%)`;
+    }
+
+    // Update chevron visibility
+    leftChevron.classList.toggle('hidden', targetLevel === 0);
+    rightChevron.classList.toggle('hidden', targetLevel === paddle.levels.length - 1);
+
+    // Update dots
+    const dots = levelDotsContainer.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === targetLevel);
+    });
 }
 
-// Initialize the level display
-updateLevelDisplay();
-updateLevelContainerPosition(0);
+function updateLevelDisplay() {
+    currentLevelElement.textContent = addCommasAndDollarSign(paddle.levels[level].amount);
+    previousLevelElement.textContent = '';
+    nextLevelElement.textContent = '';
 
-// Update the display
-function updateCountDisplay() {
-    // get count and amount
-    let count = paddle.levels[level].count;
-    let amount = paddle.levels[level].amount;
+    leftChevron.classList.toggle('hidden', level === 0);
+    rightChevron.classList.toggle('hidden', level === paddle.levels.length - 1);
 
-    // update grand total
-    grandTotal.textContent = addCommasAndDollarSign(paddle.grandTotal);
-
-    // update count display
-    valueElement.textContent = addCommasAndDollarSign(count * amount);
-    // Update the count element
-    countElement.textContent = count;
+    const dots = levelDotsContainer.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === level);
+    });
 }
+
+// Event listeners for tap areas only
+tapAreaLeft.addEventListener('click', (e) => {
+    e.preventDefault();
+    changeLevel(-1);
+});
+
+tapAreaRight.addEventListener('click', (e) => {
+    e.preventDefault();
+    changeLevel(1);
+});
 
 // Increment button event
 incrementBtn.addEventListener('click', function() {
@@ -263,10 +209,10 @@ document.getElementById('custom-lists-btn').addEventListener('click', () => {
 
 // Load saved data when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    loadSavedData();
+    const dataLoaded = loadSavedData();
     createLevelDots();
-    updateCountDisplay();
     updateLevelDisplay();
+    updateCountDisplay();
 });
 
 // Function to save data
@@ -287,7 +233,9 @@ function loadSavedData() {
         level = parsedData.level;
         paddle.levels = parsedData.levels;
         paddle.grandTotal = parsedData.grandTotal;
+        return true;
     }
+    return false;
 }
 
 // Add this function to handle custom count input
@@ -320,4 +268,28 @@ function createLevelDots() {
         }
         levelDotsContainer.appendChild(dot);
     });
+}
+
+// Easing function for smoother animation
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+}
+
+// Initialize the level display
+updateLevelDisplay();
+updateLevelContainerPosition(0);
+
+// Update the display
+function updateCountDisplay() {
+    // get count and amount
+    let count = paddle.levels[level].count;
+    let amount = paddle.levels[level].amount;
+
+    // update grand total
+    grandTotal.textContent = addCommasAndDollarSign(paddle.grandTotal);
+
+    // update count display
+    valueElement.textContent = addCommasAndDollarSign(count * amount);
+    // Update the count element
+    countElement.textContent = count;
 }

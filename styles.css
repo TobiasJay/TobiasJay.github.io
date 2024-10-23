@@ -111,3 +111,23 @@ p > img {
     flex-direction: column;
     align-items: center;
 }
+
+.project-highlight {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.project-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.project-button:hover {
+    background-color: #0056b3;
+}

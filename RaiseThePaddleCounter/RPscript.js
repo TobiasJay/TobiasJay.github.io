@@ -153,8 +153,8 @@ updateLevelContainerPosition(0);
 // Update the display
 function updateCountDisplay() {
     // get count and amount
-    let count = paddle.levels[level].count
-    let amount = paddle.levels[level].amount
+    let count = paddle.levels[level].count;
+    let amount = paddle.levels[level].amount;
 
     // update grand total
     grandTotal.textContent = addCommasAndDollarSign(paddle.grandTotal);
@@ -277,3 +277,23 @@ function loadSavedData() {
         paddle.grandTotal = parsedData.grandTotal;
     }
 }
+
+// Add this function to handle custom count input
+function handleCustomCount() {
+    const currentCount = paddle.levels[level].count;
+    const newCount = prompt(`Enter new count (current: ${currentCount}):`, currentCount);
+    
+    if (newCount !== null && !isNaN(newCount)) {
+        const parsedCount = parseInt(newCount, 10);
+        const difference = parsedCount - currentCount;
+        
+        paddle.levels[level].count = parsedCount;
+        paddle.updateGrandTotal(paddle.levels[level].amount * difference);
+        
+        updateCountDisplay();
+        saveData();
+    }
+}
+
+// Add this event listener for the count element
+countElement.addEventListener('click', handleCustomCount);

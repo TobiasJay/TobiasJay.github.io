@@ -116,14 +116,15 @@ section {
 .buttons {
     height: 45%;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
     background-color: #f0f0f0;
+    position: relative;
+    padding: 10px;
 }
 
 .buttons button {
-    width: 40%;
-    padding: 20px;
     font-size: 2rem;
     cursor: pointer;
     border: none;
@@ -132,13 +133,23 @@ section {
 }
 
 #decrement-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 60px;
+    height: 60px;
     background-color: #f44336;
     color: white;
+    font-size: 1.5rem;
+    z-index: 10;
 }
 
 #increment-btn {
+    flex-grow: 1;
     background-color: #4CAF50;
     color: white;
+    padding: 20px;
+    margin-top: 70px; /* To give space for the decrement button */
 }
 
 #decrement-btn:hover {

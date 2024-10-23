@@ -160,7 +160,7 @@ function updateCountDisplay() {
     grandTotal.textContent = addCommasAndDollarSign(paddle.grandTotal);
 
     // update count display
-    valueElement.textContent = minimizeNotation(count * amount);
+    valueElement.textContent = addCommasAndDollarSign(count * amount);
     // Update the count element
     countElement.textContent = count;
 }

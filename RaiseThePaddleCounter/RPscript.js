@@ -12,6 +12,7 @@ const levelContainer = document.querySelector('.level-container');
 const currentLevelElement = document.getElementById('current-level');
 const previousLevelElement = document.getElementById('previous-level');
 const nextLevelElement = document.getElementById('next-level');
+const levelDotsContainer = document.querySelector('.level-dots');
 
 let startX;
 let currentX;
@@ -99,6 +100,16 @@ function updateLevelDisplay() {
     currentLevelElement.textContent = addCommasAndDollarSign(paddle.levels[level].amount);
     previousLevelElement.textContent = level > 0 ? addCommasAndDollarSign(paddle.levels[level - 1].amount) : '';
     nextLevelElement.textContent = level < paddle.levels.length - 1 ? addCommasAndDollarSign(paddle.levels[level + 1].amount) : '';
+
+    // Update active dot
+    const dots = levelDotsContainer.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        if (index === level) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
 }
 
 function finishLevelChange(targetPercentage) {
@@ -253,6 +264,7 @@ document.getElementById('custom-lists-btn').addEventListener('click', () => {
 // Load saved data when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     loadSavedData();
+    createLevelDots();
     updateCountDisplay();
     updateLevelDisplay();
 });
@@ -297,3 +309,15 @@ function handleCustomCount() {
 
 // Add this event listener for the count element
 countElement.addEventListener('click', handleCustomCount);
+
+// Add this function to create the dots
+function createLevelDots() {
+    paddle.levels.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        if (index === level) {
+            dot.classList.add('active');
+        }
+        levelDotsContainer.appendChild(dot);
+    });
+}

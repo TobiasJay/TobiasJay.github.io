@@ -68,14 +68,15 @@ section {
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding-top: 10px;
 }
 
 .level-container {
     position: relative;
     width: 100%;
-    height: 80%;
+    height: 60%;
     overflow: hidden;
 }
 
@@ -228,7 +229,7 @@ button {
 /* Add this new rule for the bidding level label */
 .level .label {
     position: absolute;
-    bottom: 5px;
+    bottom: 25px;
     left: 0;
     right: 0;
     text-align: center;
@@ -244,4 +245,26 @@ button {
 
 .editable:hover {
     background-color: #f0f0f0;
+}
+
+.level-dots {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 4px;
+    transition: background-color 0.3s;
+}
+
+.dot.active {
+    background-color: #4CAF50;
 }

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Raise The Paddle</title>
+    <link rel="stylesheet" href="RPstyles.css">
+</head>
+<body>
+    <div id="landing-page" class="page active">
+        <h1>Raise The Paddle</h1>
+        <button id="new-event-btn" class="large-button">New Event</button>
+        <button id="event-list-btn" class="large-button">Event List</button>
+    </div>
+    <script>
+        document.getElementById('new-event-btn').addEventListener('click', () => {
+            window.location.href = 'newevent.html';
+        });
+        document.getElementById('event-list-btn').addEventListener('click', () => {
+            window.location.href = 'eventlist.html';
+        });
+    </script>
+</body>
+</html>

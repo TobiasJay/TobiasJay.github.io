@@ -1,8 +1,26 @@
 import { PaddleObj } from './PaddleObj.js';
 
+// Get the event name from the URL
+const urlParams = new URLSearchParams(window.location.search);
+const eventName = urlParams.get('event');
+
+// Load the specific event
+let paddle;
+const events = JSON.parse(localStorage.getItem('events')) || [];
+const event = events.find(e => e.name === eventName);
+
+if (event) {
+    paddle = new PaddleObj();
+    Object.assign(paddle, event.data);
+    document.getElementById('event-title').textContent = eventName;
+} else {
+    console.error('Event not found');
+    // Redirect to the landing page if the event is not found
+    window.location.href = 'index.html';
+}
+
 let level = 0;
 
-const paddle = new PaddleObj();
 const valueElement = document.getElementById('value');
 const countElement = document.getElementById('count');
 const incrementBtn = document.getElementById('increment-btn');
@@ -217,12 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Function to save data
 function saveData() {
-    const dataToSave = {
-        level: level,
-        levels: paddle.levels,
-        grandTotal: paddle.grandTotal
-    };
-    localStorage.setItem('paddleData', JSON.stringify(dataToSave));
+    const eventIndex = events.findIndex(e => e.name === eventName);
+    if (eventIndex !== -1) {
+        events[eventIndex].data = paddle;
+        localStorage.setItem('events', JSON.stringify(events));
+    }
 }
 
 // Function to load saved data
@@ -293,3 +310,8 @@ function updateCountDisplay() {
     // Update the count element
     countElement.textContent = count;
 }
+
+// Add an event listener for the back button
+document.getElementById('back-btn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+});

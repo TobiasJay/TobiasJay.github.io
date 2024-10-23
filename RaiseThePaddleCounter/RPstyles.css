@@ -321,3 +321,92 @@ button {
 .tap-area-right {
     right: 0;
 }
+
+/* Add these new styles at the end of your existing CSS file */
+
+#landing-page, #new-event-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.large-button {
+    font-size: 2rem;
+    padding: 20px 40px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.large-button:hover {
+    background-color: #45a049;
+}
+
+#new-event-form {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    max-width: 400px;
+}
+
+#new-event-form label {
+    margin-bottom: 5px;
+}
+
+#new-event-form input {
+    font-size: 1.2rem;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+#new-event-form button {
+    font-size: 1.2rem;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#new-event-form button:hover {
+    background-color: #45a049;
+}
+
+/* Add these styles to your existing CSS file */
+
+#event-list {
+    list-style-type: none;
+    padding: 0;
+    width: 80%;
+    max-width: 400px;
+}
+
+#event-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+#event-list button {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#event-list button:hover {
+    background-color: #cc0000;
+}

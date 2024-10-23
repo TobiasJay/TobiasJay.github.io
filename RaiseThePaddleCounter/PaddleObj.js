@@ -1,5 +1,6 @@
 export class PaddleObj {
-    constructor() {
+    constructor(name) {
+        this.name = name;
         this.levels = [
             { amount: 10000, count: 0 },
             { amount: 5000, count: 0 },

@@ -54,38 +54,6 @@ function changeLevel(direction) {
     }
 }
 
-function animateLevelChange(startLevel, endLevel) {
-    const startTime = performance.now();
-    const duration = 200; // 200ms animation
-
-    // Prepare the content for the next and previous levels
-    const currentContent = addCommasAndDollarSign(paddle.levels[startLevel].amount);
-    const nextContent = endLevel < paddle.levels.length ? addCommasAndDollarSign(paddle.levels[endLevel].amount) : '';
-    const prevContent = startLevel > 0 ? addCommasAndDollarSign(paddle.levels[startLevel - 1].amount) : '';
-
-    function animate(currentTime) {
-        const elapsedTime = currentTime - startTime;
-        const progress = Math.min(elapsedTime / duration, 1);
-        const easedProgress = easeInOutCubic(progress);
-        const currentPercentage = 100 * (endLevel - startLevel) * (1 - easedProgress);
-
-        updateLevelContainerPosition(currentPercentage, startLevel, endLevel, currentContent, nextContent, prevContent);
-
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            level = endLevel; // Only update the level after animation is complete
-            updateLevelDisplay();
-            updateCountDisplay();
-            updateLevelContainerPosition(0, endLevel, endLevel, nextContent, nextContent, prevContent);
-            saveData();
-            isChangingLevel = false;
-        }
-    }
-
-    requestAnimationFrame(animate);
-}
-
 function updateLevelContainerPosition(percentage, currentLevel, targetLevel, currentContent, nextContent, prevContent) {
     const direction = targetLevel > currentLevel ? 1 : -1;
 
@@ -164,31 +132,7 @@ decrementBtn.addEventListener('click', function() {
 function addCommasAndDollarSign(num) {
     return "$" + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
-// slick chat GPT function for readability
-function minimizeNotation(num) {
-    const suffixes = ['', 'K', 'M', 'B', 'T']; // Suffixes for thousand, million, billion, etc.
-    let suffixIndex = 0;
-
-    // Divide num by 1000 until it's below 1000, and track how many times we divide
-    while (num >= 1000 && suffixIndex < suffixes.length - 1) {
-        num /= 1000;
-        suffixIndex++;
-    }
-
-    // Format the number to a maximum of three significant digits
-    let formattedNum = num.toFixed(2); // Initially keep 2 decimal places
-
-    // Remove unnecessary .00 or .X0 (like 2.50 -> 2.5)
-    if (formattedNum.endsWith('00')) {
-        formattedNum = formattedNum.slice(0, -3); // Remove ".00"
-    } else if (formattedNum.endsWith('0')) {
-        formattedNum = formattedNum.slice(0, -1); // Remove trailing zero
-    }
-
-    return "$" + formattedNum + suffixes[suffixIndex];
-}
-
+    
 const settingsBtn = document.getElementById('settings-btn');
 const mainBtn = document.getElementById('main-btn');
 const customListsBtn = document.getElementById('custom-lists-btn');

@@ -12,6 +12,24 @@
         <form id="new-event-form">
             <label for="event-name">Event Name:</label>
             <input type="text" id="event-name" name="event-name" required>
+            <div id="levels-selection">
+                <h3>Select Levels:</h3>
+                <div>
+                    <input type="radio" id="default-levels-radio" name="levels-type" value="default" checked>
+                    <label for="default-levels-radio">Default Levels</label>
+                </div>
+                <div>
+                    <input type="radio" id="custom-levels-radio" name="levels-type" value="custom">
+                    <label for="custom-levels-radio">Custom Levels</label>
+                </div>
+            </div>
+            <div id="levels-display">
+                <h3>Selected Levels:</h3>
+                <ul id="levels-list">
+                    <!-- Levels will be populated dynamically using JavaScript -->
+                </ul>
+                <button id="customize-button" type="button">Customize</button>
+            </div>
             <button type="submit">Create Event</button>
         </form>
     </div>

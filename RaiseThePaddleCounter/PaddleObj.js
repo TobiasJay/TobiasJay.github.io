@@ -35,4 +35,13 @@ export class PaddleObj {
     updateGrandTotal(levelAmount) {
         this.grandTotal += levelAmount;
     }
+
+    addNewLevel(amount) {
+        if (!this.levels.some(level => level.amount === amount)) {
+            this.levels.push({ amount, count: 0 });
+            this.levels.sort((a, b) => b.amount - a.amount);
+            return true;
+        }
+        return false;
+    }
 }

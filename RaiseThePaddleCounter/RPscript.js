@@ -174,6 +174,7 @@ countElement.addEventListener('click', handleCustomCount);
 
 // Add this function to create the dots
 function createLevelDots() {
+    levelDotsContainer.innerHTML = ''; // Clear existing dots
     paddle.levels.forEach((_, index) => {
         const dot = document.createElement('div');
         dot.classList.add('dot');
@@ -223,3 +224,53 @@ document.getElementById('details-btn').addEventListener('click', (event) => {
         alert('Error: No event selected. Please go back to the home page and select an event');
     }
 });
+
+// Add this new function to handle adding a new level
+function handleAddNewLevel() {
+    const newLevelAmount = prompt("Add new level? Enter the amount:");
+    if (newLevelAmount === null) return; // User cancelled the prompt
+
+    const amount = parseNumberInput(newLevelAmount);
+    if (!isNaN(amount) && amount > 0) {
+        // Check if the level already exists
+        const existingLevelIndex = paddle.levels.findIndex(level => level.amount === amount);
+        if (existingLevelIndex !== -1) {
+            // If the level exists, just go to that level
+            level = existingLevelIndex;
+            updateLevelDisplay();
+            updateCountDisplay();
+            return;
+        }
+
+        // Add the new level to the paddle object
+        paddle.levels.push({ amount: amount, count: 0 });
+        
+        // Sort the levels in descending order
+        paddle.levels.sort((a, b) => b.amount - a.amount);
+
+        // Find the index of the new level
+        const newLevelIndex = paddle.levels.findIndex(level => level.amount === amount);
+
+        // Update the level variable to the new level's index
+        level = newLevelIndex;
+
+        // Recreate the level dots
+        createLevelDots();
+
+        // Update the display
+        updateLevelDisplay();
+        updateCountDisplay();
+        saveData();
+    } else {
+        alert('Please enter a valid positive number.');
+    }
+}
+
+// Function to parse number input (reuse from custom-lists.js)
+function parseNumberInput(input) {
+    const cleanInput = input.replace(/,|\s/g, '');
+    return parseInt(cleanInput, 10);
+}
+
+// Modify the event listener for the current level element
+currentLevelElement.addEventListener('click', handleAddNewLevel);

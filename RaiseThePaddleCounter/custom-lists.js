@@ -32,6 +32,14 @@ function removeLevel(index) {
     populateLevels();
 }
 
+// New function to parse number input
+function parseNumberInput(input) {
+    // Remove all commas and spaces from the input
+    const cleanInput = input.replace(/,|\s/g, '');
+    // Parse the cleaned input as an integer
+    return parseInt(cleanInput, 10);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Load levels from localStorage or use default levels
     const storedLevels = localStorage.getItem('customLevels');
@@ -45,7 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add new level
     document.getElementById('add-new-level').addEventListener('click', () => {
-        const amount = parseInt(prompt('Enter the new level amount:'));
+        const input = prompt('Enter the new level amount:');
+        if (input === null) return; // User cancelled the prompt
+
+        const amount = parseNumberInput(input);
         if (!isNaN(amount) && amount > 0) {
             addNewLevel(amount);
         } else {

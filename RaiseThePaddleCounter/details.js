@@ -31,23 +31,25 @@ document.addEventListener('DOMContentLoaded', () => {
         let grandTotal = 0;
 
         paddle.levels.forEach(level => {
-            // Create a row for all levels, even if count is 0
-            const row = document.createElement('tr');
-            const countCell = document.createElement('td');
-            const levelCell = document.createElement('td');
-            const totalCell = document.createElement('td');
+            // Only create a row if the count is greater than 0
+            if (level.count > 0) {
+                const row = document.createElement('tr');
+                const countCell = document.createElement('td');
+                const levelCell = document.createElement('td');
+                const totalCell = document.createElement('td');
 
-            countCell.textContent = level.count;
-            levelCell.textContent = `$${level.amount.toLocaleString()}`;
-            const levelTotal = level.count * level.amount;
-            totalCell.textContent = `$${levelTotal.toLocaleString()}`;
+                countCell.textContent = level.count;
+                levelCell.textContent = `$${level.amount.toLocaleString()}`;
+                const levelTotal = level.count * level.amount;
+                totalCell.textContent = `$${levelTotal.toLocaleString()}`;
 
-            row.appendChild(countCell);
-            row.appendChild(levelCell);
-            row.appendChild(totalCell);
-            levelsBody.appendChild(row);
+                row.appendChild(countCell);
+                row.appendChild(levelCell);
+                row.appendChild(totalCell);
+                levelsBody.appendChild(row);
 
-            grandTotal += levelTotal;
+                grandTotal += levelTotal;
+            }
         });
 
         grandTotalElement.textContent = `$${grandTotal.toLocaleString()}`;
@@ -60,5 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeBtn = document.getElementById('home-btn');
     homeBtn.addEventListener('click', () => {
         window.location.href = 'index.html';
+    });
+
+    const backToEventBtn = document.getElementById('back-to-event-btn');
+    backToEventBtn.addEventListener('click', () => {
+        window.location.href = `RaiseThePaddleCounter.html?event=${encodeURIComponent(eventName)}`;
     });
 });

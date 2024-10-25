@@ -3,7 +3,6 @@ import { PaddleObj } from './PaddleObj.js';
 // Get the event name from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const eventName = urlParams.get('event');
-console.log('Event name from URL:', eventName); // Debugging line
 
 // Load the specific event
 let paddle;
@@ -151,7 +150,6 @@ function saveData() {
         events.push({ name: eventName, data: paddle });
     }
     localStorage.setItem('events', JSON.stringify(events));
-    console.log('Saved event data:', events[eventIndex]); // Debugging line
 }
 
 // Add this function to handle custom count input

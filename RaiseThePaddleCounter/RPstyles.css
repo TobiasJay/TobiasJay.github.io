@@ -410,3 +410,41 @@ button {
 #event-list button:hover {
     background-color: #cc0000;
 }
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.settings-icon {
+    font-size: 24px;
+    color: #333;
+    text-decoration: none;
+}
+
+#create-event-btn {
+    margin-bottom: 20px;
+}
+
+#event-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#event-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+#event-list li button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}

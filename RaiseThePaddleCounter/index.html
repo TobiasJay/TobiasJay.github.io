@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Raise The Paddle</title>
+    <title>Events - Raise The Paddle</title>
     <link rel="stylesheet" href="RPstyles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div id="landing-page" class="page active">
-        <h1>Raise The Paddle</h1>
-        <button id="new-event-btn" class="large-button">New Event</button>
-        <button id="event-list-btn" class="large-button">Event List</button>
+    <div id="event-list-page" class="page active">
+        <header>
+            <h1>Events</h1>
+            <a href="settings.html" id="settings-btn" class="settings-icon">
+                <i class="fas fa-cog"></i>
+            </a>
+        </header>
+        <button id="create-event-btn" class="large-button">Create New Event</button>
+        <ul id="event-list"></ul>
     </div>
-    <script>
-        document.getElementById('new-event-btn').addEventListener('click', () => {
-            window.location.href = 'newevent.html';
-        });
-        document.getElementById('event-list-btn').addEventListener('click', () => {
-            window.location.href = 'eventlist.html';
-        });
-    </script>
+    <script src="index.js"></script>
 </body>
 </html>

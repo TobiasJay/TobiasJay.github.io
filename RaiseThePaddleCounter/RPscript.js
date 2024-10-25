@@ -3,6 +3,7 @@ import { PaddleObj } from './PaddleObj.js';
 // Get the event name from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const eventName = urlParams.get('event');
+console.log('Event name from URL:', eventName); // Debugging line
 
 // Load the specific event
 let paddle;
@@ -10,7 +11,8 @@ const events = JSON.parse(localStorage.getItem('events')) || [];
 const event = events.find(e => e.name === eventName);
 
 if (event) {
-    paddle = new PaddleObj();
+    // Create a new PaddleObj and populate it with the saved data
+    paddle = new PaddleObj(eventName);
     Object.assign(paddle, event.data);
     document.getElementById('event-title').textContent = eventName;
 } else {
@@ -132,46 +134,9 @@ decrementBtn.addEventListener('click', function() {
 function addCommasAndDollarSign(num) {
     return "$" + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-    
-const settingsBtn = document.getElementById('settings-btn');
-const mainBtn = document.getElementById('main-btn');
-const customListsBtn = document.getElementById('custom-lists-btn');
 
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    
-    document.querySelectorAll('footer button').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`button[data-page="${pageId}"]`).classList.add('active');
-}
-
-settingsBtn.addEventListener('click', () => showPage('settings-page'));
-mainBtn.addEventListener('click', () => showPage('main-page'));
-customListsBtn.addEventListener('click', () => showPage('custom-lists-page'));
-
-// Set data-page attributes for the buttons
-settingsBtn.setAttribute('data-page', 'settings-page');
-mainBtn.setAttribute('data-page', 'main-page');
-customListsBtn.setAttribute('data-page', 'custom-lists-page');
-
-// Set the main button as active by default
-mainBtn.classList.add('active');
-
-document.getElementById('settings-btn').addEventListener('click', () => {
-    window.location.href = 'settings.html';
-});
-
-document.getElementById('main-btn').addEventListener('click', () => {
-    window.location.href = 'index.html';
-});
-
-document.getElementById('custom-lists-btn').addEventListener('click', () => {
-    window.location.href = 'custom-lists.html';
-});
-
-// Load saved data when the page loads
+// Modify the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', () => {
-    const dataLoaded = loadSavedData();
     createLevelDots();
     updateLevelDisplay();
     updateCountDisplay();
@@ -182,21 +147,11 @@ function saveData() {
     const eventIndex = events.findIndex(e => e.name === eventName);
     if (eventIndex !== -1) {
         events[eventIndex].data = paddle;
-        localStorage.setItem('events', JSON.stringify(events));
+    } else {
+        events.push({ name: eventName, data: paddle });
     }
-}
-
-// Function to load saved data
-function loadSavedData() {
-    const savedData = localStorage.getItem('paddleData');
-    if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        level = parsedData.level;
-        paddle.levels = parsedData.levels;
-        paddle.grandTotal = parsedData.grandTotal;
-        return true;
-    }
-    return false;
+    localStorage.setItem('events', JSON.stringify(events));
+    console.log('Saved event data:', events[eventIndex]); // Debugging line
 }
 
 // Add this function to handle custom count input
@@ -256,6 +211,17 @@ function updateCountDisplay() {
 }
 
 // Add an event listener for the back button
-document.getElementById('back-btn').addEventListener('click', () => {
+document.getElementById('home-btn').addEventListener('click', () => {
     window.location.href = 'index.html';
+});
+
+// Add this near the end of the file
+document.getElementById('details-btn').addEventListener('click', (event) => {
+    if (eventName) {
+        saveData();
+        window.location.href = `details.html?event=${encodeURIComponent(eventName)}`;
+    } else {
+        console.error('No event name available');
+        alert('Error: No event selected. Please go back to the home page and select an event');
+    }
 });

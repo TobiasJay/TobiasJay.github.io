@@ -68,4 +68,30 @@ document.addEventListener('DOMContentLoaded', () => {
     backToEventBtn.addEventListener('click', () => {
         window.location.href = `RaiseThePaddleCounter.html?event=${encodeURIComponent(eventName)}`;
     });
+
+    // Add event listener for the download button
+    const downloadBtn = document.getElementById('download-btn');
+    downloadBtn.addEventListener('click', downloadCSV);
+
+    function downloadCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Count,Level,Total\n";  // CSV header
+
+        paddle.levels.forEach(level => {
+            if (level.count > 0) {
+                const levelTotal = level.count * level.amount;
+                csvContent += `${level.count},$${level.amount},$${levelTotal}\n`;
+            }
+        });
+
+        csvContent += `\nGrand Total,,$${paddle.grandTotal}\n`;
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${eventName}_paddle_details.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 });

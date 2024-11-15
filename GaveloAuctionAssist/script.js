@@ -244,17 +244,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
             numberDisplay.style.color = 'white'; // Reset color to white
             nameDisplay.textContent = '';
 
-            // Clear history after 10 entries
-            if (history.length > 10) {
-                history.shift();
-                renderHistory();
-            }
+
         } else if (input === 'Backspace') {
             currentInput = currentInput.slice(0, -1); // Remove the last character
             numberDisplay.textContent = currentInput;
             numberDisplay.style.color = 'white'; // Reset color to white
+        } else if (input === 'Delete') { // Check for Delete key
+            deleteKeyPressCount++;
+            if (deleteKeyPressCount === 3) {
+                clearHistory(); // Call clearHistory on three rapid presses
+                deleteKeyPressCount = 0; // Reset the count
+            }
+            // Reset the count after a short delay
+            setTimeout(() => {
+                deleteKeyPressCount = 0;
+            }, 400); // Adjust the time as needed
         }
     }
+
+    // Initialize a variable to count Delete key presses
+    let deleteKeyPressCount = 0;
 
     function updateClock() {
         const now = new Date();
@@ -289,5 +298,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
             p.textContent = entry;
             historyDisplay.appendChild(p);
         });
+    }
+
+    function clearHistory() {
+        history = [];
+        renderHistory();
     }
 });

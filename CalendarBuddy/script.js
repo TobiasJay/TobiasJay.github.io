@@ -54,6 +54,53 @@ function parseTranscript(transcript) {
         notes = transcript.substring(lastAmPmIndex + 2).trim();
     }
     
+    function parseDateTime(dateStr, timeStr) {
+        // Normalize the date string (remove 'st', 'nd', 'rd', 'th')
+        const normalizedDate = dateStr.replace(/(\d+)(st|nd|rd|th)/g, "$1");
+    
+        // Parse the time range
+        const timeRegex = /(\d+)(:\d+)?\s*(am|pm)?(?:\s*[-to]+\s*(\d+)(:\d+)?\s*(am|pm)?)?/i;
+        const timeMatch = timeStr.match(timeRegex);
+    
+        if (!timeMatch) {
+            throw new Error("Invalid time format");
+        }
+    
+        // Extract time components
+        const [_, startHour, startMinute = ":00", startPeriod, endHour, endMinute = ":00", endPeriod] = timeMatch;
+    
+        // Parse start time
+        const startTime = parseTime(normalizedDate, startHour, startMinute, startPeriod);
+    
+        // Parse end time (use the same period as the start if not provided)
+        const endTime = endHour
+            ? parseTime(normalizedDate, endHour, endMinute, endPeriod || startPeriod)
+            : null;
+    
+        return { startTime, endTime };
+    }
+    
+    // Helper function to parse a single time
+    function parseTime(date, hour, minute, period) {
+        // Convert to 24-hour format
+        let hour24 = parseInt(hour, 10);
+        if (period && period.toLowerCase() === "pm" && hour24 < 12) {
+            hour24 += 12;
+        } else if (period && period.toLowerCase() === "am" && hour24 === 12) {
+            hour24 = 0;
+        }
+    
+        // Create Date object
+        const fullDate = new Date(`${date} ${new Date().getFullYear()}`);
+        fullDate.setHours(hour24, parseInt(minute.slice(1), 10), 0, 0);
+    
+        return fullDate;
+    }
+
+
+    let timeBounds = parseDateTime(date, time);
+    console.log(timeBounds)
+
     return {
         event: event,
         date: date,

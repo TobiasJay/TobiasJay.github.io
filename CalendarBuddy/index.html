@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Parser</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Transcript to Calendar Event</h1>
@@ -11,6 +12,13 @@
     <textarea id="transcriptInput" rows="5" cols="50" placeholder="Enter transcript here..."></textarea>
     <br>
     <button onclick="processInput()">Parse Event</button>
+
+    <div id="eventSummary" class="event-card hidden">
+        <h2 id="eventTitle">Event Summary</h2>
+        <p><strong>Date:</strong> <span id="eventDate"></span></p>
+        <p><strong>Time:</strong> <span id="eventTime"></span></p>
+        <p><strong>Notes:</strong> <span id="eventNotes"></span></p>
+    </div>
 
     <script src="script.js"></script>
 

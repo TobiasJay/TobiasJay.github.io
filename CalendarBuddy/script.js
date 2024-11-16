@@ -124,12 +124,19 @@ function parseTranscript(transcript) {
     
         // Parse start time
         const startTime = parseTime(normalizedDate, startHour, startMinute, startPeriod);
-    
         return { startTime, endTime };
     }
     
     // Helper function to parse individual times
     function parseTime(dateStr, hour, minute, period) {
+        // Get the current year
+        const currentYear = new Date().getFullYear();
+        
+        // Check if the dateStr contains a year; if not, append the current year
+        if (!/\d{4}/.test(dateStr)) {
+            dateStr += ` ${currentYear}`; // Start with current year
+        }
+        
         const date = new Date(dateStr);
         
         // Convert hour to 24-hour format
@@ -140,6 +147,13 @@ function parseTranscript(transcript) {
         }
         
         date.setHours(hour, parseInt(minute.replace(':', '')), 0);
+        
+        // If the resulting date is in the past, add a year
+        const now = new Date();
+        if (date < now) {
+            date.setFullYear(date.getFullYear() + 1);
+        }
+        
         return date;
     }
     

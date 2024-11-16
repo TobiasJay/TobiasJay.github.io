@@ -75,42 +75,78 @@ function parseTranscript(transcript) {
         }
     
         // Extract time components
-        const [_, startHour, startMinute = ":00", startPeriod, endHour, endMinute = ":00", endPeriod] = timeMatch;
+        let [_, startHour, startMinute = ":00", startPeriod, endHour, endMinute = ":00", endPeriod] = timeMatch;
+    
+        // Convert hours to numbers
+        startHour = parseInt(startHour);
+        endHour = endHour ? parseInt(endHour) : null;
+    
+        // Infer AM/PM when missing
+        if (endHour !== null && endPeriod) {
+            // If end period is specified but start isn't, infer start period
+            if (!startPeriod) {
+                const endIs12HourFormat = endHour <= 12;
+                const endIsPM = endPeriod.toLowerCase() === 'pm';
+                
+                if (endIs12HourFormat) {
+                    // Convert end hour to 24-hour format for comparison
+                    const endHour24 = endIsPM && endHour !== 12 ? endHour + 12 : 
+                                     !endIsPM && endHour === 12 ? 0 : endHour;
+                    
+                    // Convert start hour to potential 24-hour times
+                    const startHourAM = startHour === 12 ? 0 : startHour;
+                    const startHourPM = startHour === 12 ? 12 : startHour + 12;
+                    
+                    // Calculate time differences
+                    const diffIfAM = endHour24 - startHourAM;
+                    const diffIfPM = endHour24 - startHourPM;
+                    
+                    // Choose the period that results in the smaller positive difference
+                    if (diffIfAM > 0 && (diffIfAM < diffIfPM || diffIfPM <= 0)) {
+                        startPeriod = 'am';
+                    } else {
+                        startPeriod = 'pm';
+                    }
+                } else {
+                    startPeriod = endPeriod; // Use same period if end hour is in 24-hour format
+                }
+            }
+        } else if (!startPeriod && !endPeriod) {
+            // If neither period is specified, make assumptions based on common business hours
+            startPeriod = startHour < 12 ? 'am' : 'pm';
+            endPeriod = endHour < 12 ? 'pm' : 'am'; // Assume PM for end times before 12
+        }
+    
+        // Parse end time (use the provided or inferred period)
+        const endTime = endHour 
+            ? parseTime(normalizedDate, endHour, endMinute, endPeriod)
+            : parseTime(normalizedDate, startHour, startMinute, startPeriod);
     
         // Parse start time
         const startTime = parseTime(normalizedDate, startHour, startMinute, startPeriod);
     
-        // Parse end time (use the same period as the start if not provided)
-        const endTime = endHour
-            ? parseTime(normalizedDate, endHour, endMinute, endPeriod || startPeriod)
-            : null;
-    
         return { startTime, endTime };
     }
     
-    // Helper function to parse a single time
-    function parseTime(date, hour, minute, period) {
-        // Convert to 24-hour format
-        let hour24 = parseInt(hour, 10);
-        if (period && period.toLowerCase() === "pm" && hour24 < 12) {
-            hour24 += 12;
-        } else if (period && period.toLowerCase() === "am" && hour24 === 12) {
-            hour24 = 0;
+    // Helper function to parse individual times
+    function parseTime(dateStr, hour, minute, period) {
+        const date = new Date(dateStr);
+        
+        // Convert hour to 24-hour format
+        if (period) {
+            period = period.toLowerCase();
+            if (period === 'pm' && hour !== 12) hour += 12;
+            if (period === 'am' && hour === 12) hour = 0;
         }
-    
-        // Create Date object
-        const fullDate = new Date(`${date} ${new Date().getFullYear()}`);
-        fullDate.setHours(hour24, parseInt(minute.slice(1), 10), 0, 0);
-    
-        return fullDate;
+        
+        date.setHours(hour, parseInt(minute.replace(':', '')), 0);
+        return date;
     }
+    
 
     let timeBounds = parseDateTime(date, time);
 
     function unparseDateTime(startDateTime, endDateTime) {
-
-        console.log(startDateTime);
-        console.log(endDateTime);
         // Options for formatting the date
         const dateOptions = { weekday: "long", month: "short", day: "numeric", year: "numeric" };
     
@@ -157,6 +193,5 @@ function processInput() {
     eventNotes.innerHTML = parsedEvent.notes;
     eventDate.innerHTML = parsedEvent.date;
     eventTime.innerHTML = parsedEvent.time;
-
 
 }

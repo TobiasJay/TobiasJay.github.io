@@ -7,3 +7,9 @@
 .hidden {
     display: none;
 }
+
+.editable-card {
+    border: 1px solid black;
+    padding: 5px;
+    background-color: #ccc;
+}

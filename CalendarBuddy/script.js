@@ -3,9 +3,11 @@ const eventTime = document.getElementById('eventTime');
 const eventTitle = document.getElementById('eventTitle');
 const eventNotes = document.getElementById('eventNotes');
 const eventSummary = document.getElementById('eventSummary');
+const textAreaInput = document.getElementById('transcriptInput');
 
 // Need to add error handling when date isn't specified. 
 // additionally when date comes after time it doesn't find date. 
+// Would like to add some edit powers for the text and time if it doesn't work out.
 
 function parseTranscript(transcript) {
     let event = "";
@@ -195,6 +197,9 @@ function parseTranscript(transcript) {
     
     formattedDateTime = unparseDateTime(timeBounds.startTime, timeBounds.endTime);
 
+    // Strip whitespace before notes
+    notes = notes.replace(/^[\s\p{P}]+/u, '');
+
     return {
         event: event,
         date: formattedDateTime.formattedDate,
@@ -204,7 +209,7 @@ function parseTranscript(transcript) {
 }
 
 function processInput() {
-    const transcript = document.getElementById("transcriptInput").value;
+    const transcript = textAreaInput.value;
     const parsedEvent = parseTranscript(transcript);
     console.log(parsedEvent);
 
@@ -221,3 +226,15 @@ function processInput() {
 function addToCalendar() {
     console.log("imagine lol");
 }
+
+function clearInput() {
+    textAreaInput.value = "";
+}
+
+textAreaInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevents adding a new line in the textarea
+      // Call your custom submit function here
+      processInput();
+    }
+  });

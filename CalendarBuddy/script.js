@@ -4,7 +4,8 @@ const eventTitle = document.getElementById('eventTitle');
 const eventNotes = document.getElementById('eventNotes');
 const eventSummary = document.getElementById('eventSummary');
 
-
+// Need to add error handling when date isn't specified. 
+// additionally when date comes after time it doesn't find date. 
 
 function parseTranscript(transcript) {
     let event = "";
@@ -28,6 +29,7 @@ function parseTranscript(transcript) {
     }
 
     // Extract date
+    // assuming that date comes before time - needs to be fixed....
     const dateMatch = transcript.match(dateRegex);
     if (dateMatch) {
         date = dateMatch[1].trim();
@@ -111,11 +113,18 @@ function parseTranscript(transcript) {
                     startPeriod = endPeriod; // Use same period if end hour is in 24-hour format
                 }
             }
-        } else if (!startPeriod && !endPeriod) {
-            // If neither period is specified, make assumptions based on common business hours
-            startPeriod = startHour < 12 ? 'am' : 'pm';
-            endPeriod = endHour < 12 ? 'pm' : 'am'; // Assume PM for end times before 12
-        }
+        } else if (startHour && !endHour) {
+            // only one time specified
+            // 2
+            console.log(startHour);
+            // null
+            console.log(endHour);
+            // default to having two hour parties:
+            endHour = startHour < 11 ? startHour + 2 : startHour - 10;
+            // just going to assume that parties won't start at 6am 
+            endPeriod =  endHour < 9 ? 'pm' : 'am';
+
+        } 
     
         // Parse end time (use the provided or inferred period)
         const endTime = endHour 

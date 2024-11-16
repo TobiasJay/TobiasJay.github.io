@@ -1,3 +1,11 @@
+const eventDate = document.getElementById('eventDate');
+const eventTime = document.getElementById('eventTime');
+const eventTitle = document.getElementById('eventTitle');
+const eventNotes = document.getElementById('eventNotes');
+const eventSummary = document.getElementById('eventSummary');
+
+
+
 function parseTranscript(transcript) {
     let event = "";
     let date = "";
@@ -97,14 +105,41 @@ function parseTranscript(transcript) {
         return fullDate;
     }
 
-
     let timeBounds = parseDateTime(date, time);
-    console.log(timeBounds)
+
+    function unparseDateTime(startDateTime, endDateTime) {
+
+        console.log(startDateTime);
+        console.log(endDateTime);
+        // Options for formatting the date
+        const dateOptions = { weekday: "long", month: "short", day: "numeric", year: "numeric" };
+    
+        // Format date part
+        const formattedDate = startDateTime.toLocaleDateString("en-US", dateOptions);
+    
+        // Format time part
+        const formatTime = (date) => {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const period = hours >= 12 ? "PM" : "AM";
+            const formattedHours = hours % 12 === 0 ? 12 : hours % 12; // Convert to 12-hour format
+            const formattedMinutes = minutes.toString().padStart(2, "0"); // Ensure two digits for minutes
+            return `${formattedHours}:${formattedMinutes} ${period}`;
+        };
+    
+        const formattedStartTime = formatTime(startDateTime);
+        const formattedEndTime = formatTime(endDateTime);
+    
+        // Combine into the final format
+        return { formattedDate, timeRange: `from ${formattedStartTime} to ${formattedEndTime}` };
+    }
+    
+    formattedDateTime = unparseDateTime(timeBounds.startTime, timeBounds.endTime);
 
     return {
         event: event,
-        date: date,
-        time: time,
+        date: formattedDateTime.formattedDate,
+        time: formattedDateTime.timeRange,
         notes: notes
     };
 }
@@ -113,4 +148,15 @@ function processInput() {
     const transcript = document.getElementById("transcriptInput").value;
     const parsedEvent = parseTranscript(transcript);
     console.log(parsedEvent);
+
+    // unhide the card
+    eventSummary.classList.remove('hidden');
+
+    // add in details to card
+    eventTitle.innerHTML = parsedEvent.event;
+    eventNotes.innerHTML = parsedEvent.notes;
+    eventDate.innerHTML = parsedEvent.date;
+    eventTime.innerHTML = parsedEvent.time;
+
+
 }

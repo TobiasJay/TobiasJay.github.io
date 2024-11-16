@@ -9,14 +9,15 @@
 <body>
     <h1>Transcript to Calendar Event</h1>
     <label for="transcriptInput">Enter Transcript:</label>
-    <textarea id="transcriptInput" rows="5" cols="50" placeholder="Enter transcript here..."></textarea>
+    <textarea id="transcriptInput" rows="5" cols="50" placeholder="Enter transcript here...">Team meeting on Thursday November 30th from 10 AM to 12 PM at the main office.
+    </textarea>
     <br>
     <button onclick="processInput()">Parse Event</button>
 
     <div id="eventSummary" class="event-card hidden">
         <h2 id="eventTitle">Event Summary</h2>
-        <p><strong>Date:</strong> <span id="eventDate"></span></p>
-        <p><strong>Time:</strong> <span id="eventTime"></span></p>
+        <span id="eventDate"></span></p>
+        <span id="eventTime"></span></p>
         <p><strong>Notes:</strong> <span id="eventNotes"></span></p>
     </div>
 

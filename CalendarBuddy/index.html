@@ -18,7 +18,13 @@
         <h2 id="eventTitle">Event Summary</h2>
         <span id="eventDate"></span></p>
         <span id="eventTime"></span></p>
-        <p><strong>Notes:</strong> <span id="eventNotes"></span></p>
+        <p><strong>Notes:</strong></p>
+        <textarea id="eventNotes" rows="5" cols="50" placeholder="Add notes to this event...">
+        </textarea>
+
+        <div class="button-container">
+            <button onclick="addToCalendar()" id="addToCalendar">Add to Calendar</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

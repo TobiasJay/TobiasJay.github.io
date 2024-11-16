@@ -193,5 +193,8 @@ function processInput() {
     eventNotes.innerHTML = parsedEvent.notes;
     eventDate.innerHTML = parsedEvent.date;
     eventTime.innerHTML = parsedEvent.time;
+}
 
+function addToCalendar() {
+    console.log("imagine lol");
 }

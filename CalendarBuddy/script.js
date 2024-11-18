@@ -7,8 +7,13 @@ const eventNotes = document.getElementById('eventNotes');
 const eventSummary = document.getElementById('eventSummary');
 const textAreaInput = document.getElementById('transcriptInput');
 
-const API_KEY = '197005366894-qj9e80m67de1b799ekt41hdjh5ivvc7m.apps.googleusercontent.com';
-const CLIENT_ID = 'AIzaSyD5OA-Wsh5VhF9r_xPjm0jPf1PZ5wFtyZc';
+const API_KEY = '';
+const CLIENT_ID = '';
+
+document.querySelector('script[src="https://apis.google.com/js/api.js"]').onload = gapiLoaded;
+document.querySelector('script[src="https://accounts.google.com/gsi/client"]').onload = gisLoaded;
+
+
 
 // Need to add error handling when date isn't specified. 
 // additionally when date comes after time it doesn't find date. 

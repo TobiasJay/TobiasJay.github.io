@@ -13,7 +13,9 @@
     <textarea id="transcriptInput" rows="5" cols="50" placeholder="Enter transcript here..."></textarea>
     <br>
     <button onclick="processInput()">Parse Event</button>
-    <button onclick="clearInput()">clear</button>
+    <button id="authorize_button" style="visibility: hidden">Authorize</button>
+    <button id="signout_button" style="visibility: hidden">Sign Out</button>
+    
 
     <div id="eventSummary" class="event-card hidden">
         <h2 id="eventTitle">Event Summary</h2>
@@ -28,7 +30,10 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="config.js"></script>
+    <script type="module" src="script.js"></script>    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
 
 </body>
 </html>

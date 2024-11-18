@@ -1,3 +1,5 @@
+//import config from './config.js';
+
 const eventDate = document.getElementById('eventDate');
 const eventTime = document.getElementById('eventTime');
 const eventTitle = document.getElementById('eventTitle');
@@ -5,9 +7,106 @@ const eventNotes = document.getElementById('eventNotes');
 const eventSummary = document.getElementById('eventSummary');
 const textAreaInput = document.getElementById('transcriptInput');
 
+const API_KEY = '197005366894-qj9e80m67de1b799ekt41hdjh5ivvc7m.apps.googleusercontent.com';
+const CLIENT_ID = 'AIzaSyD5OA-Wsh5VhF9r_xPjm0jPf1PZ5wFtyZc';
+
 // Need to add error handling when date isn't specified. 
 // additionally when date comes after time it doesn't find date. 
 // Would like to add some edit powers for the text and time if it doesn't work out.
+// "December 'the' 14th" doesn't get recognized. Also some lowercase dates don't as well. - not typical in a voice transcript   
+// return does submit on the phone but it doesn't drop the keyboard so you can't see the card - maybe move things?
+
+const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+
+function gapiLoaded() {
+  gapi.load('client', initializeGapiClient);
+}
+
+async function initializeGapiClient() {
+  await gapi.client.init({
+    apiKey: API_KEY,
+    discoveryDocs: [DISCOVERY_DOC],
+  });
+  gapiInited = true;
+  maybeEnableButtons();
+}
+
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: '', // defined later
+  });
+  gisInited = true;
+  maybeEnableButtons();
+}
+
+function maybeEnableButtons() {
+  if (gapiInited && gisInited) {
+    document.getElementById('authorize_button').style.visibility = 'visible';
+  }
+}
+
+// 3. Handle authorization
+function handleAuthClick() {
+  tokenClient.callback = async (resp) => {
+    if (resp.error !== undefined) {
+      throw resp;
+    }
+    await listUpcomingEvents();
+  };
+
+  if (gapi.client.getToken() === null) {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  } else {
+    tokenClient.requestAccessToken({ prompt: '' });
+  }
+}
+
+function handleSignoutClick() {
+  const token = gapi.client.getToken();
+  if (token !== null) {
+    google.accounts.oauth2.revoke(token.access_token);
+    gapi.client.setToken('');
+  }
+}
+
+
+// 4. Function to create a calendar event
+async function createCalendarEvent(eventDetails) {
+    try {
+      const event = {
+        'summary': eventDetails.summary,
+        'description': eventDetails.description,
+        'start': {
+          'dateTime': eventDetails.startTime,
+          'timeZone': 'America/Los_Angeles'
+        },
+        'end': {
+          'dateTime': eventDetails.endTime,
+          'timeZone': 'America/Los_Angeles'
+        }
+      };
+  
+      const request = gapi.client.calendar.events.insert({
+        'calendarId': 'primary',
+        'resource': event
+      });
+  
+      const response = await request;
+      console.log('Event created: ', response.result);
+      return response.result;
+    } catch (err) {
+      console.error('Error creating event: ', err);
+      throw err;
+    }
+}
+
 
 function parseTranscript(transcript) {
     let event = "";

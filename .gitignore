@@ -1,3 +1,4 @@
 apikey
 config.local.js
 config.js
+.env

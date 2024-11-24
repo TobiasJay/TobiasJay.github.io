@@ -103,63 +103,130 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }).data;
 
         // Detect and recreate the table
-        const processedTable = detectAndRecreateTable(parsedData, true); // Allow 2-digit bid numbers
+        const processedTable = detectAndRecreateTable(parsedData, false); // Don't set allow two digit to false: Gets tables detected sometimes :(
         bidders = processedTable;
     }
 
-    // Reuse the detection and transformation logic to process the data
     function detectAndRecreateTable(rawData, allowTwoDigit = false) {
         let bidNumberColumn = null;
         let nameColumn = null;
-
+        let firstNameColumn = null;
+        let lastNameColumn = null;
+    
         // Define regex patterns
         const bidNumberPattern = allowTwoDigit ? /\b\d{2,3}\b/ : /\b\d{3}\b/;
         const namePattern = /^[A-Z][a-z]+ [A-Z][a-z]+|[A-Z][a-z]+ & [A-Z][a-z]+ [A-Z][a-z]+/;
-
-        // Extract column names from the first row (assuming first row contains headers)
+        const singleNamePattern = /^[A-Z][a-z]+$/;
+    
+        // Extract column names from the first row
         const columns = Object.keys(rawData[0]);
-
+    
         // Transpose the raw data to column-wise data for easier processing
         const columnsData = columns.map(col => rawData.map(row => row[col]));
-
+    
         // Helper function to check if a column matches a pattern
         const columnMatchesPattern = (column, pattern) => {
-            return column.some(value => pattern.test(String(value)));
+            const matches = column.some(value => {
+                const match = pattern.test(String(value));
+                return match;
+            });
+            return matches;
         };
-
-        // Search for the BidNumber and Name columns
+    
+        // Helper functions to identify column types by name
+        const isFirstNameColumn = (columnName) => {
+            const firstNameTerms = ['first', 'firstname', 'first_name'];
+            const matches = firstNameTerms.some(term => columnName.toLowerCase().includes(term));
+            return matches;
+        };
+    
+        const isLastNameColumn = (columnName) => {
+            const lastNameTerms = ['last', 'lastname', 'last_name', 'surname'];
+            const matches = lastNameTerms.some(term => columnName.toLowerCase().includes(term));
+            return matches;
+        };
+    
+        const isBidNumberColumn = (columnName) => {
+            const bidTerms = ['bid', 'number', 'bidnumber', 'bid_number', 'bid#', 'bidno', 'bid_no'];
+            const matches = bidTerms.some(term => columnName.toLowerCase().includes(term));
+            return matches;
+        };
+    
+        // First: Look for bid number column
         columnsData.forEach((columnData, idx) => {
-        if (!bidNumberColumn && columnMatchesPattern(columnData, bidNumberPattern)) {
-            bidNumberColumn = columns[idx];
-        }
-        if (!nameColumn && columnMatchesPattern(columnData, namePattern)) {
-            nameColumn = columns[idx];
-        }
+            const currentColumn = columns[idx];
+            if (!bidNumberColumn && 
+                (isBidNumberColumn(currentColumn) || columnMatchesPattern(columnData, bidNumberPattern))) {
+                bidNumberColumn = currentColumn;
+            }
         });
+    
+        // Second: Look for combined name column
+        columnsData.forEach((columnData, idx) => {
+            if (!nameColumn && columnMatchesPattern(columnData, namePattern)) {
+                nameColumn = columns[idx];
+            }
+        });
+    
+        // Third: Look for separate first/last name columns if no combined name column found
+        if (!nameColumn) {
+            
+            // First try to find columns by their names
+            columns.forEach((column, idx) => {
+                if (!firstNameColumn && isFirstNameColumn(column)) {
+                    firstNameColumn = column;
+                }
+                if (!lastNameColumn && isLastNameColumn(column)) {
+                    lastNameColumn = column;
+                }
+            });
+    
+            // If either is still not found, look for name-pattern matches in remaining columns
+            if (!firstNameColumn || !lastNameColumn) {
+                columns.forEach((column, idx) => {
+                    const columnData = columnsData[idx];
+                    
+                    if (columnMatchesPattern(columnData, singleNamePattern)) {
+                        if (!firstNameColumn && !isLastNameColumn(column)) {
+                            firstNameColumn = column;
+                        } else if (!lastNameColumn && !isFirstNameColumn(column)) {
+                            lastNameColumn = column;
+                        }
+                    }
+                });
+            }
+        }
 
         if (!bidNumberColumn) {
             throw new Error("BidNumber column not detected.");
         }
-        if (!nameColumn) {
-            throw new Error("Name column not detected.");
-        }
-
-        // Extract bid numbers and clean names
+    
+        // Helper functions for extraction and cleaning
         const extractBidNumber = (value) => {
             const match = String(value).match(bidNumberPattern);
             return match ? parseInt(match[0], 10) : null;
         };
-
+    
         const cleanName = (value) => {
             return String(value).trim();
         };
-
-        // Create new table with just the BidNumber and Name columns
-        const newTable = rawData.map(row => ({
-            BidNumber: extractBidNumber(row[bidNumberColumn]),
-            Name: cleanName(row[nameColumn])
-        }));
-
+    
+        // Create new table with transformed data
+        let newTable;
+        if (firstNameColumn && lastNameColumn) {
+            newTable = rawData.map(row => ({
+                BidNumber: extractBidNumber(row[bidNumberColumn]),
+                Name: cleanName(`${row[firstNameColumn]} ${row[lastNameColumn]}`)
+            }));
+        } else if (nameColumn) {
+            newTable = rawData.map(row => ({
+                BidNumber: extractBidNumber(row[bidNumberColumn]),
+                Name: cleanName(row[nameColumn])
+            }));
+        } else {
+            throw new Error("Name column(s) not detected.");
+        }
+    
         return newTable;
     }
 
@@ -195,8 +262,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 // Check first and last name for couples
                 const p1 = matchingBidders[0].split(' ');
                 const p2 = matchingBidders[1].split(' ');
-                // [1] refers to the second name in the split array aka the last name 
-                if (p1[1] === p2[1]) {
+                // [1] refers to the second name in the split array aka the last name
+
+                if (p1[0] === p2[0] && p1[1] === p2[1]) {
+                    // same first and last name, just need to return one name
+                    return p1[0] + ' ' + p1[1];
+                } else if(p1[1] === p2[1]) {
                     return p1[0] + ' and ' + p2[0] + ' ' + p1[1];
                 }
             }

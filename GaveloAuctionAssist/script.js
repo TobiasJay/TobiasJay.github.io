@@ -7,12 +7,27 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const overlay = document.getElementById('overlay');
     const container = document.querySelector('.vertContainer');
     const changeCsvButton = document.getElementById('changeCsvButton');
+    const hideClock = document.getElementById('hideClock');
 
     startClock();
 
     let currentInput = '';
     let bidders = [];
     let history = [];
+
+    // Hide clock button event listener
+    hideClock.addEventListener('click', () => {
+        const clock = document.getElementsByClassName('clock')[0];
+        console.log("hiding clock");
+        // if shown, hide - otherwise show (aka toggle visibility)
+        if (!clock.classList.contains("hidden")) {
+            clock.classList.add("hidden");
+            hideClock.innerText = "Show Clock";
+        } else {
+            clock.classList.remove("hidden");
+            hideClock.innerText = "Hide Clock";
+        }
+    })
 
     // Handle file input when the file is manually selected
     csvFileInput.addEventListener('change', handleFile);
@@ -112,7 +127,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let nameColumn = null;
         let firstNameColumn = null;
         let lastNameColumn = null;
-    
+
         // Define regex patterns
         const bidNumberPattern = allowTwoDigit ? /\b\d{2,3}\b/ : /\b\d{3}\b/;
         const namePattern = /^[A-Z][a-z]+ [A-Z][a-z]+|[A-Z][a-z]+ & [A-Z][a-z]+ [A-Z][a-z]+/;
@@ -124,6 +139,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         // Transpose the raw data to column-wise data for easier processing
         const columnsData = columns.map(col => rawData.map(row => row[col]));
     
+
         // Helper function to check if a column matches a pattern
         const columnMatchesPattern = (column, pattern) => {
             const matches = column.some(value => {
@@ -147,7 +163,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         };
     
         const isBidNumberColumn = (columnName) => {
-            const bidTerms = ['bid', 'number', 'bidnumber', 'bid_number', 'bid#', 'bidno', 'bid_no'];
+            const bidTerms = ['bid', 'number', 'bidnumber', 'bid_number', 'bid#', 'bidno', 'bid_no','biddernumber'];
             const matches = bidTerms.some(term => columnName.toLowerCase().includes(term));
             return matches;
         };
@@ -155,12 +171,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
         // First: Look for bid number column
         columnsData.forEach((columnData, idx) => {
             const currentColumn = columns[idx];
+
             if (!bidNumberColumn && 
                 (isBidNumberColumn(currentColumn) || columnMatchesPattern(columnData, bidNumberPattern))) {
                 bidNumberColumn = currentColumn;
             }
         });
-    
+
+        for (let i in rawData) {
+            if (rawData[i][bidNumberColumn] < 10) {
+                rawData[i][bidNumberColumn] = "00" + rawData[i][bidNumberColumn]
+            } else if (rawData[i][bidNumberColumn] < 100) {
+                rawData[i][bidNumberColumn] = "0" + rawData[i][bidNumberColumn]
+            }
+        }
+
+
         // Second: Look for combined name column
         columnsData.forEach((columnData, idx) => {
             if (!nameColumn && columnMatchesPattern(columnData, namePattern)) {
@@ -201,6 +227,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             throw new Error("BidNumber column not detected.");
         }
     
+        // temporarily deactivating the usaage of this... cause its dumb lmao
         // Helper functions for extraction and cleaning
         const extractBidNumber = (value) => {
             const match = String(value).match(bidNumberPattern);
@@ -211,16 +238,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
             return String(value).trim();
         };
     
+
+        
         // Create new table with transformed data
         let newTable;
         if (firstNameColumn && lastNameColumn) {
             newTable = rawData.map(row => ({
-                BidNumber: extractBidNumber(row[bidNumberColumn]),
+                BidNumber: row[bidNumberColumn],
                 Name: cleanName(`${row[firstNameColumn]} ${row[lastNameColumn]}`)
             }));
         } else if (nameColumn) {
             newTable = rawData.map(row => ({
-                BidNumber: extractBidNumber(row[bidNumberColumn]),
+                BidNumber: row[bidNumberColumn],
                 Name: cleanName(row[nameColumn])
             }));
         } else {
@@ -228,6 +257,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     
         return newTable;
+    }
+
+    function findColumnWithMostConsecutiveNumbers(data) {
+        let maxConsecutiveCount = 0;
+        let columnIndexWithMaxConsecutive = -1;
+    
+        data.forEach((row, colIndex) => {
+            let consecutiveCount = 0;
+            let maxConsecutiveInColumn = 0;
+    
+            for (let i = 1; i < row.length; i++) {
+                if (row[i] === row[i - 1] + 1) {
+                    consecutiveCount++;
+                    maxConsecutiveInColumn = Math.max(maxConsecutiveInColumn, consecutiveCount);
+                } else {
+                    consecutiveCount = 0;
+                }
+            }
+    
+            if (maxConsecutiveInColumn > maxConsecutiveCount) {
+                maxConsecutiveCount = maxConsecutiveInColumn;
+                columnIndexWithMaxConsecutive = colIndex;
+            }
+        });
+    
+        return columnIndexWithMaxConsecutive;
     }
 
     document.addEventListener('keydown', (event) => {
@@ -242,6 +297,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 
     function findBidderNames(currentInput, bidders) {
+        console.log(bidders);
         // Convert currentInput to a string for easier comparison
         const currentInputStr = currentInput.toString();
     

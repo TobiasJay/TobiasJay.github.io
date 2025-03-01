@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     const numberDisplay = document.getElementById('numberDisplay');
     const nameDisplay = document.getElementById('nameDisplay');
     const historyDisplay = document.getElementById('historyDisplay');
@@ -34,39 +34,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // Allow clicking on the drop-area to trigger file input
     dropArea.addEventListener('click', () => csvFileInput.click());
-
-    // Handle drag-and-drop functionality
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-    });
-
-    ['dragover', 'dragenter'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.add('highlight');
-        });
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.remove('highlight');
-        });
-    });
-    
-    // Handle the dropped files
-    dropArea.addEventListener('drop', handleDrop, false);
-
-    // Prevent default drag behaviors
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    // Handle file drop
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFile({ target: { files } });
-    }
         
     // Update handleFile function to show the "Change CSV" button
     function handleFile(e) {
@@ -127,120 +94,69 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let nameColumn = null;
         let firstNameColumn = null;
         let lastNameColumn = null;
-
-        // Define regex patterns
-        const bidNumberPattern = allowTwoDigit ? /\b\d{2,3}\b/ : /\b\d{3}\b/;
-        const namePattern = /^[A-Z][a-z]+ [A-Z][a-z]+|[A-Z][a-z]+ & [A-Z][a-z]+ [A-Z][a-z]+/;
-        const singleNamePattern = /^[A-Z][a-z]+$/;
     
-        // Extract column names from the first row
+        const bidNumberPattern = allowTwoDigit ? /\b\d{2,3}\b/ : /\b\d{3}\b/;
+    
         const columns = Object.keys(rawData[0]);
     
-        // Transpose the raw data to column-wise data for easier processing
         const columnsData = columns.map(col => rawData.map(row => row[col]));
     
-
-        // Helper function to check if a column matches a pattern
-        const columnMatchesPattern = (column, pattern) => {
-            const matches = column.some(value => {
-                const match = pattern.test(String(value));
-                return match;
-            });
-            return matches;
+        const firstNameTerms = ['first', 'firstname', 'first_name'];
+        const lastNameTerms = ['last', 'lastname', 'last_name', 'surname'];
+        const bidTerms = ['bid', 'number', 'bidnumber', 'bid_number', 'bid#', 'bidno', 'bid_no', 'biddernumber'];
+    
+        const cleanName = (value) => String(value).trim();
+    
+        const findColumnByHeader = (terms) => {
+            return columns.find(col => terms.some(term => col.toLowerCase().includes(term))) || null;
         };
     
-        // Helper functions to identify column types by name
-        const isFirstNameColumn = (columnName) => {
-            const firstNameTerms = ['first', 'firstname', 'first_name'];
-            const matches = firstNameTerms.some(term => columnName.toLowerCase().includes(term));
-            return matches;
-        };
+        const findColumnByPattern = (pattern) => {
+            let maxUniqueCount = 0;
+            let bestMatch = null;
     
-        const isLastNameColumn = (columnName) => {
-            const lastNameTerms = ['last', 'lastname', 'last_name', 'surname'];
-            const matches = lastNameTerms.some(term => columnName.toLowerCase().includes(term));
-            return matches;
-        };
-    
-        const isBidNumberColumn = (columnName) => {
-            const bidTerms = ['bid', 'number', 'bidnumber', 'bid_number', 'bid#', 'bidno', 'bid_no','biddernumber'];
-            const matches = bidTerms.some(term => columnName.toLowerCase().includes(term));
-            return matches;
-        };
-    
-        // First: Look for bid number column
-        columnsData.forEach((columnData, idx) => {
-            const currentColumn = columns[idx];
-
-            if (!bidNumberColumn && 
-                (isBidNumberColumn(currentColumn) || columnMatchesPattern(columnData, bidNumberPattern))) {
-                bidNumberColumn = currentColumn;
-            }
-        });
-
-        for (let i in rawData) {
-            if (rawData[i][bidNumberColumn] < 10) {
-                rawData[i][bidNumberColumn] = "00" + rawData[i][bidNumberColumn]
-            } else if (rawData[i][bidNumberColumn] < 100) {
-                rawData[i][bidNumberColumn] = "0" + rawData[i][bidNumberColumn]
-            }
-        }
-
-
-        // Second: Look for combined name column
-        columnsData.forEach((columnData, idx) => {
-            if (!nameColumn && columnMatchesPattern(columnData, namePattern)) {
-                nameColumn = columns[idx];
-            }
-        });
-    
-        // Third: Look for separate first/last name columns if no combined name column found
-        if (!nameColumn) {
-            
-            // First try to find columns by their names
-            columns.forEach((column, idx) => {
-                if (!firstNameColumn && isFirstNameColumn(column)) {
-                    firstNameColumn = column;
-                }
-                if (!lastNameColumn && isLastNameColumn(column)) {
-                    lastNameColumn = column;
+            columns.forEach((col, idx) => {
+                const uniqueValues = new Set(columnsData[idx].filter(val => pattern.test(String(val))));
+                if (uniqueValues.size > maxUniqueCount) {
+                    maxUniqueCount = uniqueValues.size;
+                    bestMatch = col;
                 }
             });
     
-            // If either is still not found, look for name-pattern matches in remaining columns
-            if (!firstNameColumn || !lastNameColumn) {
-                columns.forEach((column, idx) => {
-                    const columnData = columnsData[idx];
-                    
-                    if (columnMatchesPattern(columnData, singleNamePattern)) {
-                        if (!firstNameColumn && !isLastNameColumn(column)) {
-                            firstNameColumn = column;
-                        } else if (!lastNameColumn && !isFirstNameColumn(column)) {
-                            lastNameColumn = column;
-                        }
-                    }
-                });
-            }
-        }
-
+            return bestMatch;
+        };
+    
+        bidNumberColumn = findColumnByHeader(bidTerms);
         if (!bidNumberColumn) {
-            throw new Error("BidNumber column not detected.");
+            bidNumberColumn = findColumnByPattern(bidNumberPattern);
+            if (!bidNumberColumn) {
+                console.log("Error: BidNumber column not detected.");
+                return;
+            }
         }
     
-        // temporarily deactivating the usaage of this... cause its dumb lmao
-        // Helper functions for extraction and cleaning
-        const extractBidNumber = (value) => {
-            const match = String(value).match(bidNumberPattern);
-            return match ? parseInt(match[0], 10) : null;
-        };
+        columnsData.forEach((colData, idx) => {
+            rawData.forEach(row => {
+                if (row[bidNumberColumn] < 10) {
+                    row[bidNumberColumn] = "00" + row[bidNumberColumn];
+                } else if (row[bidNumberColumn] < 100) {
+                    row[bidNumberColumn] = "0" + row[bidNumberColumn];
+                }
+            });
+        });
     
-        const cleanName = (value) => {
-            return String(value).trim();
-        };
+        firstNameColumn = findColumnByHeader(firstNameTerms);
+        lastNameColumn = findColumnByHeader(lastNameTerms);
     
-
-        
-        // Create new table with transformed data
+        if (!firstNameColumn || !lastNameColumn) {
+            nameColumn = columns.find(col => col.toLowerCase().includes('name')) || null;
+        }
+    
+        if (!firstNameColumn && !lastNameColumn && !nameColumn) {
+            console.log("Error: Name column(s) not detected.");
+            return;
+        }
+    
         let newTable;
         if (firstNameColumn && lastNameColumn) {
             newTable = rawData.map(row => ({
@@ -252,38 +168,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 BidNumber: row[bidNumberColumn],
                 Name: cleanName(row[nameColumn])
             }));
-        } else {
-            throw new Error("Name column(s) not detected.");
         }
     
         return newTable;
-    }
-
-    function findColumnWithMostConsecutiveNumbers(data) {
-        let maxConsecutiveCount = 0;
-        let columnIndexWithMaxConsecutive = -1;
-    
-        data.forEach((row, colIndex) => {
-            let consecutiveCount = 0;
-            let maxConsecutiveInColumn = 0;
-    
-            for (let i = 1; i < row.length; i++) {
-                if (row[i] === row[i - 1] + 1) {
-                    consecutiveCount++;
-                    maxConsecutiveInColumn = Math.max(maxConsecutiveInColumn, consecutiveCount);
-                } else {
-                    consecutiveCount = 0;
-                }
-            }
-    
-            if (maxConsecutiveInColumn > maxConsecutiveCount) {
-                maxConsecutiveCount = maxConsecutiveInColumn;
-                columnIndexWithMaxConsecutive = colIndex;
-            }
-        });
-    
-        return columnIndexWithMaxConsecutive;
-    }
+    }    
 
     document.addEventListener('keydown', (event) => {
         handleInput(event.key);
@@ -296,98 +184,114 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     });
 
-    function findBidderNames(currentInput, bidders) {
-        console.log(bidders);
-        // Convert currentInput to a string for easier comparison
+    function locateBidders(currentInput, bidders) {
         const currentInputStr = currentInput.toString();
+        return bidders
+            .filter(b => b.BidNumber?.toString().startsWith(currentInputStr))
+            .map(b => b.Name);
+    }
     
-        let matchingBidders = [];
-        // Loop through each bidder and check if their BidNumber matches the currentInput
-        bidders.forEach(b => {
-            if (b.BidNumber !== null && b.BidNumber !== undefined) {
-                const bidNumber = b.BidNumber.toString(); // Convert BidNumber to string
-                if (bidNumber.startsWith(currentInputStr)) {
-                    // Log the bidder's Name if the BidNumber matches the currentInput
-                    matchingBidders.push(b.Name);
-                }
-            }
-        });
-
-        if (matchingBidders.length > 0) {
-            if (matchingBidders.length == 2) {
-                // Check first and last name for couples
-                const p1 = matchingBidders[0].split(' ');
-                const p2 = matchingBidders[1].split(' ');
-                // [1] refers to the second name in the split array aka the last name
-
-                if (p1[0] === p2[0] && p1[1] === p2[1]) {
-                    // same first and last name, just need to return one name
-                    return p1[0] + ' ' + p1[1];
-                } else if(p1[1] === p2[1]) {
-                    return p1[0] + ' and ' + p2[0] + ' ' + p1[1];
-                }
-            }
-
-
-            return matchingBidders.join(', ');
-        } else {
+    function formatMatchingBidders(matchingBidders) {
+        if (!matchingBidders || matchingBidders.length === 0) {
             return "No matching bidders found.";
         }
-    }
+    
+        const uniqueBidders = [...new Set(matchingBidders)];
+    
+        if (uniqueBidders.length === 1) {
+            return uniqueBidders[0];
+        }
+    
+        const parsedNames = uniqueBidders.map(name => name.split(' '));
+        const lastName = parsedNames[0][1];
+        const allShareLastName = parsedNames.every(([_, lname]) => lname === lastName);
+    
+        if (allShareLastName) {
+            const firstNames = parsedNames.map(([fname]) => fname);
+            return firstNames.length === 2
+                ? `${firstNames[0]} and ${firstNames[1]} ${lastName}`
+                : `${firstNames.slice(0, -1).join(', ')} and ${firstNames.slice(-1)} ${lastName}`;
+        }
+    
+        return uniqueBidders.join(', ');
+    }    
+    
+    function findBidderNames(currentInput, bidders) {
+        const matchingBidders = locateBidders(currentInput, bidders);
+        return formatMatchingBidders(matchingBidders);
+    }    
 
-    // Function to handle input from both keyboard and keypad
-    function handleInput(input) {
-        if (!isNaN(input) && input !== ' ') { // Check if input is a number
-            if (currentInput.length < 3) {
-                currentInput += input;
-                numberDisplay.textContent = currentInput;
-                numberDisplay.style.color = 'white';
-
-                if (currentInput.length === 3) {
-
-                    // Look up the bidder
-                    // This needs to be more robust. Find all entries starting with those three digits
-                    const fullName = findBidderNames(currentInput, bidders);
-                    if (fullName !== "No matching bidders found.") {
-                        nameDisplay.textContent = fullName;
-
-                        // Add to history
-                        history.unshift(`${currentInput}: ${fullName}`); // Prepend new entry
-                        renderHistory();
-                    } else {
-                        numberDisplay.style.color = 'red';
-                        nameDisplay.textContent = "couldn't find that bid card";
-                    }
-                }
-            } else { // Clear current input and display the new number
-                currentInput = input;
-                numberDisplay.textContent = currentInput;
-                numberDisplay.style.color = 'white';
-                nameDisplay.textContent = '';
+    function handleNumericInput(input) {
+        if (currentInput.length < 3) {
+            currentInput += input;
+            updateNumberDisplay(currentInput, 'white');
+    
+            if (currentInput.length === 3) {
+                processBidderLookup();
             }
-        } else if (input === 'Enter' || input === 'C') {
-            currentInput = ''; // Clear the input
-            numberDisplay.textContent = '';
-            numberDisplay.style.color = 'white'; // Reset color to white
-            nameDisplay.textContent = '';
-
-
-        } else if (input === 'Backspace') {
-            currentInput = currentInput.slice(0, -1); // Remove the last character
-            numberDisplay.textContent = currentInput;
-            numberDisplay.style.color = 'white'; // Reset color to white
-        } else if (input === 'Delete') { // Check for Delete key
-            deleteKeyPressCount++;
-            if (deleteKeyPressCount === 3) {
-                clearHistory(); // Call clearHistory on three rapid presses
-                deleteKeyPressCount = 0; // Reset the count
-            }
-            // Reset the count after a short delay
-            setTimeout(() => {
-                deleteKeyPressCount = 0;
-            }, 400); // Adjust the time as needed
+        } else {
+            resetInput(input);
         }
     }
+    
+    function processBidderLookup() {
+        const fullName = findBidderNames(currentInput, bidders);
+        if (fullName !== "No matching bidders found.") {
+            updateNameDisplay(fullName);
+            addToHistory(currentInput, fullName);
+        } else {
+            updateNumberDisplay(currentInput, 'red');
+            updateNameDisplay("couldn't find that bid card");
+        }
+    }
+    
+    function resetInput(input = '') {
+        currentInput = input;
+        updateNumberDisplay(currentInput, 'white');
+        updateNameDisplay('');
+    }
+    
+    function handleSpecialKeys(input) {
+        if (input === 'Enter' || input === 'C') {
+            resetInput();
+        } else if (input === 'Backspace') {
+            currentInput = currentInput.slice(0, -1);
+            updateNumberDisplay(currentInput, 'white');
+        } else if (input === 'Delete') {
+            trackDeleteKeyPress();
+        }
+    }
+    
+    function trackDeleteKeyPress() {
+        deleteKeyPressCount++;
+        if (deleteKeyPressCount === 3) {
+            clearHistory();
+            deleteKeyPressCount = 0;
+        }
+        setTimeout(() => { deleteKeyPressCount = 0; }, 400);
+    }
+    
+    function updateNumberDisplay(number, color) {
+        numberDisplay.textContent = number;
+        numberDisplay.style.color = color;
+    }
+    
+    function updateNameDisplay(name) {
+        nameDisplay.textContent = name;
+    }
+    
+    function addToHistory(number, name) {
+        history.unshift(`${number}: ${name}`);
+        renderHistory();
+    }
+    
+    function handleInput(input) {
+        if (!isNaN(input) && input !== ' ') {
+            handleNumericInput(input);
+        } else {
+            handleSpecialKeys(input);
+        }
+    }    
 
     // Initialize a variable to count Delete key presses
     let deleteKeyPressCount = 0;

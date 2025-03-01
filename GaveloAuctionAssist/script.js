@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Allow clicking on the drop-area to trigger file input
     dropArea.addEventListener('click', () => csvFileInput.click());
+
+    // Allow the button to trigger the file input again
+    changeCsvButton.addEventListener('click', () => csvFileInput.click());
         
     // Update handleFile function to show the "Change CSV" button
     function handleFile(e) {
@@ -53,28 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show the "Change CSV" button and update its text with the file name
             changeCsvButton.style.display = 'block';
             changeCsvButton.textContent = `Change CSV: ${file.name}`;
-        }
+        } 
     }
-
-    // Allow the button to trigger the file input again
-    changeCsvButton.addEventListener('click', () => {
-        csvFileInput.click(); // Trigger file input on button click
-    });
-
-
-    document.getElementById('csvFileInput').addEventListener('change', function(event) {
-        const file = event.target.files[0]; // Get the selected file
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const csvText = e.target.result;
-                processCSV(csvText); // Call your CSV processing function
-            };
-            reader.readAsText(file);
-        } else {
-            alert('Please select a CSV file.');
-        }
-    });
 
     // Function to process the CSV
     function processCSV(csvText) {
@@ -130,12 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!bidNumberColumn) {
             bidNumberColumn = findColumnByPattern(bidNumberPattern);
             if (!bidNumberColumn) {
-                console.log("Error: BidNumber column not detected.");
+                // Error visible to user
+                alert("Error: BidNumber column not detected. Please check your CSV file.");
                 return;
             }
         }
     
-        columnsData.forEach((colData, idx) => {
+        columnsData.forEach(() => {
             rawData.forEach(row => {
                 if (row[bidNumberColumn] < 10) {
                     row[bidNumberColumn] = "00" + row[bidNumberColumn];
@@ -153,7 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         if (!firstNameColumn && !lastNameColumn && !nameColumn) {
-            console.log("Error: Name column(s) not detected.");
+            // error for user
+            alert("Error: Name column(s) not detected. Please check your CSV file.");
             return;
         }
     
@@ -169,7 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 Name: cleanName(row[nameColumn])
             }));
         }
-    
+        
+        resetInput();
         return newTable;
     }    
 
@@ -258,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentInput = currentInput.slice(0, -1);
             updateNumberDisplay(currentInput, 'white');
         } else if (input === 'Delete') {
+            // if three rapid delete presses are detected, clear the history
             trackDeleteKeyPress();
         }
     }
@@ -265,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function trackDeleteKeyPress() {
         deleteKeyPressCount++;
         if (deleteKeyPressCount === 3) {
-            clearHistory();
+            fullReset();
             deleteKeyPressCount = 0;
         }
         setTimeout(() => { deleteKeyPressCount = 0; }, 400);
@@ -329,6 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
             p.textContent = entry;
             historyDisplay.appendChild(p);
         });
+    }
+
+    function fullReset() {
+        resetInput();
+        clearHistory();
+        renderHistory();
     }
 
     function clearHistory() {

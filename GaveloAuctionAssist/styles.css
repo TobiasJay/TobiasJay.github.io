@@ -1,3 +1,18 @@
+:root {
+    --text-bg-color: #cdcdcd;
+    --alt-bg-color: #fffefe;
+    --text-color: #1a1a1a;
+    --light-text-color: rgb(208, 208, 208);
+
+}
+
+body.darkmode {
+    --text-bg-color: #0f0f0f;
+    --alt-bg-color: #2d2d2d;
+
+    --text-color: rgb(208, 208, 208);
+}
+
 .hidden {
     display: none;
 }
@@ -9,7 +24,8 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: var(--text-bg-color);
+    color: var(--text-color);
     font-family: Arial, sans-serif;
     overflow: hidden; /* Prevent scrolling */
 }
@@ -21,8 +37,8 @@ header {
     left: 0;
     width: 100%;
     height: 30px; /* Set the height to 20px */
-    background-color: #333;
-    color: white;
+    background-color: var(--text-bg-color);
+    color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -38,8 +54,8 @@ input[type="file"] {
     width: 400px;
     margin: 0;
     height: 18px; /* Fit within the 20px header */
-    background-color: #555;
-    color: white;
+    background-color: var(--alt-bg-color);
+    color: var(--text-color);
     border: none;
     cursor: pointer;
     border-radius: 3px;
@@ -73,8 +89,8 @@ input:hover {
     font-family: 'Arial', sans-serif;
     font-size: 4em;
     padding: 10px;
-    background: #333;
-    color: white;
+    background: var(--alt-bg-color);
+    color: var(--text-color);
     border-radius: 10px;
     text-align: center;
 }
@@ -83,12 +99,12 @@ input:hover {
     width: 300px;
     height: 150px;
     text-align: center;
-    background-color: #333;
+    background-color: var(--alt-bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 7em;
-    color: white;
+    color: var(--text-color);
     border-radius: 10px;
     margin-top: 20px; /* Add some spacing below header */
 }
@@ -102,13 +118,14 @@ input:hover {
 #historyDisplay {
     width: 800px;
     flex-grow: 1; /* Make the history fill the available space */
-    background-color: #eaeaea;
+    background-color: var(--alt-bg-color);
     font-size: 3em;
     margin-top: 20px;
     padding: 10px;
     overflow-y: auto; /* Keep history scrollable but ensure no page scroll */
     max-height: calc(100vh - 250px); /* Ensure it does not exceed the viewport height */
     border-radius: 5px;
+    color: var(--text-color);
 }
 
 #keys {

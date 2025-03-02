@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.vertContainer');
     const changeCsvButton = document.getElementById('changeCsvButton');
     const hideClock = document.getElementById('hideClock');
+    const darkMode = document.getElementById('darkMode');
 
     startClock();
 
@@ -15,10 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let bidders = [];
     let history = [];
 
+    // toggle dark mode
+    darkMode.addEventListener('click', () => {
+        document.querySelector('body').classList.toggle('darkmode');
+    });
+
     // Hide clock button event listener
     hideClock.addEventListener('click', () => {
         const clock = document.getElementsByClassName('clock')[0];
-        console.log("hiding clock");
         // if shown, hide - otherwise show (aka toggle visibility)
         if (!clock.classList.contains("hidden")) {
             clock.classList.add("hidden");
@@ -210,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleNumericInput(input) {
         if (currentInput.length < 3) {
             currentInput += input;
-            updateNumberDisplay(currentInput, 'white');
-    
+            updateNumberDisplay(currentInput, 'var(--text-color)');
+            
             if (currentInput.length === 3) {
                 processBidderLookup();
             }
@@ -233,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function resetInput(input = '') {
         currentInput = input;
-        updateNumberDisplay(currentInput, 'white');
+        updateNumberDisplay(currentInput, 'var(--text-color)');
         updateNameDisplay('');
     }
     
@@ -242,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resetInput();
         } else if (input === 'Backspace') {
             currentInput = currentInput.slice(0, -1);
-            updateNumberDisplay(currentInput, 'white');
+            updateNumberDisplay(currentInput, 'var(--text-color)');
         } else if (input === 'Delete') {
             // if three rapid delete presses are detected, clear the history
             trackDeleteKeyPress();

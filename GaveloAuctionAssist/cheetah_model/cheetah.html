@@ -1,14 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Cheetah Real-time Speech-to-Text - Picovoice</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gavelo Guest ID Audio</title>
     <script src="node_modules/@picovoice/cheetah-web/dist/iife/index.js"></script>
     <script src="node_modules/@picovoice/web-voice-processor/dist/iife/index.js"></script>
-    <script src="cheetah.js"></script>
-  </head>
-  <body>
-    <div>Real-time Transcription: <span id="transcript"></span></div>
-    <button id="start-cheetah">Start Cheetah</button>
-    <button id="stop-cheetah">Stop Cheetah</button>
-  </body>
+    <script src="audioProcess.js" type="module"></script>
+    <script src="cheetScript.js" type="module"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="overlay" class="overlay">
+        <div id="drop-area" class="drop-area">
+            <p>Drag and drop your CSV file here, or <span id="fileSelectText">click to select</span></p>
+            <input type="file" id="csvFileInput" accept=".csv" hidden>
+        </div>
+    </div>
+
+    <header>
+        <button id="changeCsvButton" style="display: none;">Change CSV</button>
+    </header>
+    <div id="audioButtonContainer">
+      <div>Real-time Transcription: <span id="transcript"></span></div>
+      <button id="start-cheetah">Start Cheetah</button>
+      <button id="stop-cheetah">Stop Cheetah</button>
+    </div>
+    <div class="vertContainer">
+        <div class="horiContainer">
+            <div class="clock">
+                <span id="hours"></span>:
+                <span id="minutes"></span>
+            </div>
+            <div id="numberDisplay"></div>
+        </div>
+        <div id="nameDisplay"></div>
+        <div id="historyDisplay"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</body>
 </html>

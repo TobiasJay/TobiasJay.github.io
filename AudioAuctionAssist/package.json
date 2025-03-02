@@ -1,0 +1,19 @@
+{
+  "name": "audioauctionassist",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "http-server -a localhost -p 5000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@picovoice/cheetah-web": "^2.0.0",
+    "@picovoice/web-voice-processor": "^4.0.9",
+    "express": "^4.21.1",
+    "http-server": "^14.1.1"
+  }
+}

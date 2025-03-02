@@ -2,6 +2,7 @@
   "name": "cheetah_model",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "http-server -a localhost -p 5000"
   },

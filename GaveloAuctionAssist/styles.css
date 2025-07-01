@@ -14,7 +14,7 @@ body.darkmode {
 }
 
 .hidden {
-    display: none;
+    visibility: hidden;
 }
 
 body {
@@ -77,15 +77,13 @@ input:hover {
 
 .horiContainer {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
+    align-items: center;
     position: relative;
     width: 100%;
 }
 
 .clock {
-    position: absolute;
-    top:25%;
-    left: 100px;
     font-family: 'Arial', sans-serif;
     font-size: 4em;
     padding: 10px;
@@ -170,4 +168,16 @@ input:hover {
     color: lightblue;
     text-decoration: underline;
     cursor: pointer;
+}
+
+/* Logo styles */
+
+.logo {
+    padding: 10px;
+    text-align: center;
+}
+
+#logoImage {
+    width: 256px;
+    height: auto;
 }

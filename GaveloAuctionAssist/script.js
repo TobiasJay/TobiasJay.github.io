@@ -290,7 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateClock() {
         const now = new Date();
-        const hours = (now.getHours()%12).toString().padStart(2, '0');
+        let hours = now.getHours() % 12;
+        if (hours === 0) hours = 12;
+        hours = hours.toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
         
         document.getElementById('hours').textContent = hours;

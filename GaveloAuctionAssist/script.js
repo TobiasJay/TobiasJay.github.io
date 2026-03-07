@@ -175,8 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function locateBidders(currentInput, bidders) {
         const currentInputStr = currentInput.toString();
-        console.log("Locating bidders with input:", currentInputStr);
-        console.log("Bidders data:", bidders);
         return bidders
             .filter(b => b.BidNumber?.toString().startsWith(currentInputStr))
             .map(b => b.Name);

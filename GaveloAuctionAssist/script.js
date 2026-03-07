@@ -124,16 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     
-        columnsData.forEach(() => {
-            rawData.forEach(row => {
-                if (row[bidNumberColumn] < 10) {
-                    row[bidNumberColumn] = "00" + row[bidNumberColumn];
-                } else if (row[bidNumberColumn] < 100) {
-                    row[bidNumberColumn] = "0" + row[bidNumberColumn];
-                }
-            });
+        rawData.forEach(row => {
+            if (row[bidNumberColumn] < 10) {
+                row[bidNumberColumn] = "00" + row[bidNumberColumn];
+            } else if (row[bidNumberColumn] < 100) {
+                row[bidNumberColumn] = "0" + row[bidNumberColumn];
+            }
         });
-    
+
         firstNameColumn = findColumnByHeader(firstNameTerms);
         lastNameColumn = findColumnByHeader(lastNameTerms);
     
@@ -177,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function locateBidders(currentInput, bidders) {
         const currentInputStr = currentInput.toString();
+        console.log("Locating bidders with input:", currentInputStr);
+        console.log("Bidders data:", bidders);
         return bidders
             .filter(b => b.BidNumber?.toString().startsWith(currentInputStr))
             .map(b => b.Name);
